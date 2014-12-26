@@ -1,0 +1,15 @@
+{
+    "name": "jbouzekri/composer-deploy-plugin",
+    "type": "composer-plugin",
+    "require": {
+        "composer-plugin-api": "1.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jb\\Composer\\DeployPlugin\\": "src/Jb/Composer/DeployPlugin"
+        }
+    },
+    "extra": {
+        "class": "Jb\\Composer\\DeployPlugin\\JbDeployPlugin"
+    }
+}
