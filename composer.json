@@ -1,6 +1,10 @@
 {
     "name": "jbouzekri/composer-deploy-plugin",
     "type": "composer-plugin",
+    "license": "MIT",
+    "description": "Auto deploy static files with composer in a public document root folder",
+    "keywords": ["php", "composer", "continuous integration", "deployment"],
+    "homepage": "https://github.com/jbouzekri/ComposerDeployPlugin",
     "require": {
         "composer-plugin-api": "1.0.0"
     },
@@ -11,5 +15,12 @@
     },
     "extra": {
         "class": "Jb\\Composer\\DeployPlugin\\JbDeployPlugin"
-    }
+    },
+    "authors": [
+        {
+            "name": "Jonathan Bouzekri",
+            "email": "jonathan.bouzekri@gmail.com",
+            "homepage": "http://jonathan.bouzekri.net"
+        }
+    ]
 }
