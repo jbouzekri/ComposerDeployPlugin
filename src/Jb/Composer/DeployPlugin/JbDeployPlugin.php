@@ -18,6 +18,8 @@ use Composer\Script\ScriptEvents;
 use Composer\Script\Event;
 use Composer\Package\PackageInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Filesystem\Exception\IOException;
 
 /**
  * JbDeployPlugin
@@ -78,7 +80,11 @@ class JbDeployPlugin implements PluginInterface, EventSubscriberInterface
      */
     public function deployAssets(Event $event)
     {
-        $this->dump('Trying to deploy package');
+        if ($this->getConfig()->getSymlink()) {
+            $this->dump('Trying to deploy package as <comment>symlinks</comment>');
+        } else {
+            $this->dump('Trying to deploy package as <comment>hard copy</comment>');
+        }
 
         $targetDir = $this->getConfig()->getTargetDir();
 
@@ -122,6 +128,7 @@ class JbDeployPlugin implements PluginInterface, EventSubscriberInterface
         $path = $event->getComposer()->getInstallationManager()->getInstallPath($package);
         $packageDirName = $this->getPackageDirName($package);
         $configuredTargetDir = $this->getConfig()->getTargetDir();
+        $symlink = $this->getConfig()->getSymlink();
 
         foreach ($this->getConfig()->getFolders() as $folder) {
             if (!is_dir($originDir = $path.'/'.$folder)) {
@@ -131,6 +138,12 @@ class JbDeployPlugin implements PluginInterface, EventSubscriberInterface
             $targetDir = sprintf('%s/%s/%s', $configuredTargetDir, $packageDirName, $folder);
 
             $this->getFilesystem()->remove($targetDir);
+
+            if ($symlink) {
+                $this->symlinkCopy($originDir, $targetDir);
+            } else {
+                $this->hardCopy($originDir, $targetDir);
+            }
 
             $this->dump(
                 sprintf(
@@ -197,5 +210,49 @@ class JbDeployPlugin implements PluginInterface, EventSubscriberInterface
         }
 
         $this->io->write(sprintf("%s >> %s", Config::PLUGIN_NAMESPACE, $message));
+    }
+
+    /**
+     * Make a hard copy of a folder
+     *
+     * @param string $originDir
+     * @param string $targetDir
+     */
+    protected function hardCopy($originDir, $targetDir)
+    {
+        $filesystem = $this->getFilesystem();
+
+        $filesystem->mkdir($targetDir, 0777);
+        $filesystem->mirror(
+            $originDir,
+            $targetDir,
+            Finder::create()->ignoreDotFiles(false)->in($originDir)
+        );
+    }
+
+    /**
+     * Make a symlink of a folder
+     *
+     * @param string $originDir
+     * @param string $targetDir
+     * @param bool $relative
+     */
+    protected function symlinkCopy($originDir, $targetDir, $relative = false)
+    {
+        $filesystem = $this->getFilesystem();
+
+        if ($relative) {
+            // TODO
+            //$relativeOriginDir = $filesystem->makePathRelative($originDir, realpath($bundlesDir));
+        } else {
+            $relativeOriginDir = $originDir;
+        }
+
+        try {
+            $filesystem->symlink($relativeOriginDir, $targetDir);
+        } catch (IOException $e) {
+            $this->hardCopy($originDir, $targetDir);
+            $this->dump('Your system doesn\'t support symbolic links, so the assets were installed by copying them.');
+        }
     }
 }

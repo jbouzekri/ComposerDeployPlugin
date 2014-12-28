@@ -70,6 +70,16 @@ class Config
     }
 
     /**
+     * Make symlink relative
+     *
+     * @return bool
+     */
+    public function getRelative()
+    {
+        return $this->config['relative'];
+    }
+
+    /**
      * Get exclude
      *
      * @return array
@@ -108,14 +118,16 @@ class Config
             'target-dir' => null,
             'exclude' => array(),
             'folders' => array(),
-            'symlink' => false
+            'symlink' => false,
+            'relative' => false
         ));
 
         $resolver->setAllowedTypes(array(
             'target-dir' => array('null', 'string'),
             'exclude' => array('array'),
             'folders' => array('array'),
-            'symlink' => array('bool')
+            'symlink' => array('bool'),
+            'relative' => array('bool')
         ));
 
         return $resolver;
