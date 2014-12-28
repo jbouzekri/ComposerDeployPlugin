@@ -86,7 +86,10 @@ class Config
      */
     public function getExclude()
     {
-        return $this->config['exclude'];
+        return array_merge(
+            $this->config['exclude'],
+            array('jbouzekri/composer-deploy-plugin')
+        );
     }
 
     /**

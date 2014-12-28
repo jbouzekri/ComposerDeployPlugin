@@ -244,6 +244,8 @@ class JbDeployPlugin implements PluginInterface, EventSubscriberInterface
     {
         $filesystem = $this->getFilesystem();
 
+        $filesystem->mkdir($bundleDir, 0777);
+
         if ($relative) {
             $relativeOriginDir = $filesystem->makePathRelative($originDir, realpath($bundleDir));
         } else {
