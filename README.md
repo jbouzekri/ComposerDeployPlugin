@@ -3,7 +3,7 @@ ComposerDeployPlugin
 
 This composer plugin add extra configuration to copy folders from the vendor to another one.
 
-It can be usefull to publish assets to a public document root.
+It can be useful to publish assets to a public document root.
 The framework symfony uses the similar method to publish assets from users' extensions to the apache public document root.
 
 Installation
@@ -48,7 +48,7 @@ All the plugin configuration must be placed in the `extra` key of your project `
 
 **The target dir must exists before running the command**
 
-Exemple
+Example
 -------
 
 In this example, all js and css folders from the project packages will be deployed in a web/composed folder
@@ -102,4 +102,4 @@ will copy the css and js folders of all packages to the folder web/composed crea
 License
 -------
 
-[MIT](https://github.com/jbouzekri/ComposerDeployPlugin/blob/master/README.md)
+[MIT](https://github.com/jbouzekri/ComposerDeployPlugin/blob/master/LICENSE)
