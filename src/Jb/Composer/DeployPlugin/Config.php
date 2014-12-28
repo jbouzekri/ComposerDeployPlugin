@@ -60,6 +60,26 @@ class Config
     }
 
     /**
+     * Get symlink
+     *
+     * @return bool
+     */
+    public function getSymlink()
+    {
+        return $this->config['symlink'];
+    }
+
+    /**
+     * Get exclude
+     *
+     * @return array
+     */
+    public function getExclude()
+    {
+        return $this->config['exclude'];
+    }
+
+    /**
      * Normalize configuration
      *
      * @param array $extras
@@ -87,7 +107,15 @@ class Config
         $resolver->setDefaults(array(
             'target-dir' => null,
             'exclude' => array(),
-            'folders' => array()
+            'folders' => array(),
+            'symlink' => false
+        ));
+
+        $resolver->setAllowedTypes(array(
+            'target-dir' => array('null', 'string'),
+            'exclude' => array('array'),
+            'folders' => array('array'),
+            'symlink' => array('bool')
         ));
 
         return $resolver;

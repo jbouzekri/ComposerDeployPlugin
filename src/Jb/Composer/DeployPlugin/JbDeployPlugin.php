@@ -83,12 +83,12 @@ class JbDeployPlugin implements PluginInterface, EventSubscriberInterface
         $targetDir = $this->getConfig()->getTargetDir();
 
         if ($targetDir === null) {
-            $this->dump('No target dir configured');
+            $this->dump('No target dir configured', 'error');
             return;
         }
 
         if (!is_dir($targetDir)) {
-            $this->dump(sprintf('Target dir %s does not exists', $targetDir));
+            $this->dump(sprintf('Target dir %s does not exists', $targetDir), 'error');
             return;
         }
 
@@ -98,9 +98,17 @@ class JbDeployPlugin implements PluginInterface, EventSubscriberInterface
             ->getLocalRepository()
             ->getCanonicalPackages();
 
+        $excludePackages = $this->getConfig()->getExclude();
+
         foreach ($installedPackages as $package) {
+            if (in_array($package->getName(), $excludePackages)) {
+                continue;
+            }
+
             $this->deployPackage($event, $package);
         }
+
+        $this->dump('End');
     }
 
     /**
@@ -113,17 +121,26 @@ class JbDeployPlugin implements PluginInterface, EventSubscriberInterface
     {
         $path = $event->getComposer()->getInstallationManager()->getInstallPath($package);
         $packageDirName = $this->getPackageDirName($package);
+        $configuredTargetDir = $this->getConfig()->getTargetDir();
 
         foreach ($this->getConfig()->getFolders() as $folder) {
             if (!is_dir($originDir = $path.'/'.$folder)) {
                 continue;
             }
 
-            $targetDir = sprintf('%s/%s/%s', $this->getConfig()->getTargetDir(), $packageDirName, $folder);
+            $targetDir = sprintf('%s/%s/%s', $configuredTargetDir, $packageDirName, $folder);
 
             $this->getFilesystem()->remove($targetDir);
 
-            $this->dump(sprintf('Folder %s from package %s deployed in %s', $folder, $package->getName(), $targetDir));
+            $this->dump(
+                sprintf(
+                    'Folder <comment>%s</comment> from package <comment>%s</comment>'
+                    . ' deployed in <comment>%s</comment>',
+                    $folder,
+                    $package->getName(),
+                    $targetDir
+                )
+            );
         }
     }
 
@@ -167,8 +184,18 @@ class JbDeployPlugin implements PluginInterface, EventSubscriberInterface
         return $this->filesystem;
     }
 
+    /**
+     * Write a message to stdout
+     *
+     * @param string $message
+     * @param string $type
+     */
     protected function dump($message, $type = null)
     {
-        $this->io->write($message);
+        if ($type !== null) {
+            $message = sprintf("<%s>%s</%s>", $type, $message, $type);
+        }
+
+        $this->io->write(sprintf("%s >> %s", Config::PLUGIN_NAMESPACE, $message));
     }
 }
