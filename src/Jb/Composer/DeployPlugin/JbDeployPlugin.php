@@ -129,18 +129,20 @@ class JbDeployPlugin implements PluginInterface, EventSubscriberInterface
         $packageDirName = $this->getPackageDirName($package);
         $configuredTargetDir = $this->getConfig()->getTargetDir();
         $symlink = $this->getConfig()->getSymlink();
+        $relative = $this->getConfig()->getRelative();
 
         foreach ($this->getConfig()->getFolders() as $folder) {
             if (!is_dir($originDir = $path.'/'.$folder)) {
                 continue;
             }
 
-            $targetDir = sprintf('%s/%s/%s', $configuredTargetDir, $packageDirName, $folder);
+            $bundleDir = sprintf('%s/%s', $configuredTargetDir, $packageDirName);
+            $targetDir = sprintf('%s/%s', $bundleDir, $folder);
 
             $this->getFilesystem()->remove($targetDir);
 
             if ($symlink) {
-                $this->symlinkCopy($originDir, $targetDir);
+                $this->symlinkCopy($originDir, $targetDir, $bundleDir, $relative);
             } else {
                 $this->hardCopy($originDir, $targetDir);
             }
@@ -235,15 +237,15 @@ class JbDeployPlugin implements PluginInterface, EventSubscriberInterface
      *
      * @param string $originDir
      * @param string $targetDir
+     * @param string $bundleDir
      * @param bool $relative
      */
-    protected function symlinkCopy($originDir, $targetDir, $relative = false)
+    protected function symlinkCopy($originDir, $targetDir, $bundleDir, $relative = false)
     {
         $filesystem = $this->getFilesystem();
 
         if ($relative) {
-            // TODO
-            //$relativeOriginDir = $filesystem->makePathRelative($originDir, realpath($bundlesDir));
+            $relativeOriginDir = $filesystem->makePathRelative($originDir, realpath($bundleDir));
         } else {
             $relativeOriginDir = $originDir;
         }
